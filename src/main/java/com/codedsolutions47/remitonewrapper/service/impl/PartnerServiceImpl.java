@@ -1,14 +1,18 @@
 package com.codedsolutions47.remitonewrapper.service.impl;
 
+import com.codedsolutions47.remitonewrapper.dtos.request.GetCollectionPoints;
+import com.codedsolutions47.remitonewrapper.dtos.request.GetDeliveryBankBranches;
+import com.codedsolutions47.remitonewrapper.dtos.request.GetDeliveryBanks;
 import com.codedsolutions47.remitonewrapper.service.PartnerService;
-import com.codedsolutions47.remitonewrapper.util.PrettyPrinter;
-import lombok.RequiredArgsConstructor;
+import com.codedsolutions47.remitonewrapper.service.UtilityService;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 @Slf4j
 @Service
@@ -25,25 +29,25 @@ public class PartnerServiceImpl implements PartnerService {
     private String accessPin;
     @Value("${api.path.destinationCountries}")
     private String destinationCountriesPath;
+    @Value("${api.path.deliveryBanks}")
+    private String deliveryBanksPath;
+    @Value("${api.path.deliveryBankBranches}")
+    private String deliveryBankBranchesPath;
+    @Value("${api.path.collectionPoints}")
+    private String collectionPointsPath;
 
-    public PartnerServiceImpl(OkHttpClient httpClient) {
+    private final UtilityService utilityService;
+
+    public PartnerServiceImpl(OkHttpClient httpClient, UtilityService utilityService) {
         this.httpClient = httpClient;
+        this.utilityService = utilityService;
     }
 
 
     @Override
     public String getDestinationCountries() {
-        RequestBody requestBody = new FormBody.Builder()
-                .add("username", accessUsername)
-                .add("password", accessPassword)
-                .add("pin", accessPin)
-                .build();
-        Request request = new Request.Builder()
-                .url(baseUrl + destinationCountriesPath)
-                .post(requestBody)
-                .addHeader("Content-Type", "application/x-www-form-urlencoded")
-                .build();
-        log.info("Getting destination countries -- username: {}, password: {}, pin: {}", accessUsername, accessPassword, accessPin);
+        Map<String, String> params = new HashMap<>();
+        Request request = utilityService.createRequest(destinationCountriesPath, params);
         try (Response response = httpClient.newCall(request).execute()) {
             if (!response.isSuccessful()) {
                 log.error("Unexpected code {} with message {}", response.code(), response.message());
@@ -65,7 +69,80 @@ public class PartnerServiceImpl implements PartnerService {
 
 
     @Override
-    public String getDeliveryInfo() {
-        return "";
+    public String getDeliveryBanks(GetDeliveryBanks getDeliveryBanks) {
+        Map<String, String> params = new HashMap<>();
+        params.put("dest_country", getDeliveryBanks.getDestCountry());
+        params.put("country_code", getDeliveryBanks.getCountryCode());
+        params.put("bank_code", getDeliveryBanks.getBankCode());
+        Request request = utilityService.createRequest(deliveryBanksPath, params);
+        try (Response response = httpClient.newCall(request).execute()) {
+            if (!response.isSuccessful()) {
+                log.error("Unexpected code {} with message {}", response.code(), response.message());
+                return null;
+            }
+            ResponseBody responseBody = response.body();
+            if (responseBody == null) {
+                log.error("Response body is null");
+                return null;
+            }
+            String responseBodyString = responseBody.string();
+            log.info("Received XML response from API - {}", responseBodyString);
+            return responseBodyString;
+        } catch (IOException e) {
+            log.error("Error calling external API: ", e);
+            return null;
+        }
+    }
+
+    @Override
+    public String getDeliveryBankBranches(GetDeliveryBankBranches getDeliveryBankBranches) {
+        Map<String, String> params = new HashMap<>();
+        params.put("delivery_bank", getDeliveryBankBranches.getDeliveryBank());
+        params.put("destination_country", getDeliveryBankBranches.getDestinationCountry());
+        params.put("destination_country_code", getDeliveryBankBranches.getDestinationCountryCode());
+        Request request = utilityService.createRequest(deliveryBankBranchesPath, params);
+        try (Response response = httpClient.newCall(request).execute()) {
+            if (!response.isSuccessful()) {
+                log.error("Unexpected code {} with message {}", response.code(), response.message());
+                return null;
+            }
+            ResponseBody responseBody = response.body();
+            if (responseBody == null) {
+                log.error("Response body is null");
+                return null;
+            }
+            String responseBodyString = responseBody.string();
+            log.info("Received XML response from API - {}", responseBodyString);
+            return responseBodyString;
+        } catch (IOException e) {
+            log.error("Error calling external API: ", e);
+            return null;
+        }
+    }
+
+    @Override
+    public String getCollectionPoints(GetCollectionPoints getCollectionPoints) {
+        Map<String, String> params = new HashMap<>();
+        params.put("delivery_bank", getCollectionPoints.getDeliveryBank());
+        params.put("destination_country", getCollectionPoints.getDestinationCountry());
+        params.put("destination_country_code", getCollectionPoints.getDestinationCountryCode());
+        Request request = utilityService.createRequest(collectionPointsPath, params);
+        try (Response response = httpClient.newCall(request).execute()) {
+            if (!response.isSuccessful()) {
+                log.error("Unexpected code {} with message {}", response.code(), response.message());
+                return null;
+            }
+            ResponseBody responseBody = response.body();
+            if (responseBody == null) {
+                log.error("Response body is null");
+                return null;
+            }
+            String responseBodyString = responseBody.string();
+            log.info("Received XML response from API - {}", responseBodyString);
+            return responseBodyString;
+        } catch (IOException e) {
+            log.error("Error calling external API: ", e);
+            return null;
+        }
     }
 }
