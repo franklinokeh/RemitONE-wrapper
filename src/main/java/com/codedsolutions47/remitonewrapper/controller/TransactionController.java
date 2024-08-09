@@ -1,6 +1,7 @@
 package com.codedsolutions47.remitonewrapper.controller;
 
 
+import com.codedsolutions47.remitonewrapper.dtos.request.ConfirmTransaction;
 import com.codedsolutions47.remitonewrapper.dtos.request.CreateTransaction;
 import com.codedsolutions47.remitonewrapper.service.PartnerService;
 import com.codedsolutions47.remitonewrapper.service.TransactionService;
@@ -11,10 +12,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/transactions")
@@ -39,26 +37,51 @@ public class TransactionController {
                 return ResponseEntity.status(500).body(null);
             }
         } catch (Exception ex) {
-            log.error("Error occurred in getDeliveryBanks: ", ex);
+            log.error("Error occurred in createTransaction: ", ex);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(null);
         }
     }
 
 
-//    @PostMapping("/confirm")
-//    public ResponseEntity<Void> confirmTransaction(@RequestParam String sessionId) {
-//        // Call the service method to confirm a transaction
-//        transactionService.confirmTransaction(sessionId);
-//        return ResponseEntity.ok().build();
-//    }
+    @PostMapping("/confirm")
+    public ResponseEntity<JsonNode> confirmTransaction(@RequestBody ConfirmTransaction confirmTransaction) {
+        log.info(" ====  Entered confirmTransaction method =====  {}", PrettyPrinter.printJson(confirmTransaction));
+        try {
+            String response = transactionService.confirmTransaction(confirmTransaction);
+            JsonNode jsonResponse = utilityService.getXMLResponseAsJson(response);
+            if (jsonResponse != null) {
+                log.info("confirmTransaction Response: {}", PrettyPrinter.printJson(jsonResponse));
+                return ResponseEntity.ok(jsonResponse);
+            } else {
+                return ResponseEntity.status(500).body(null);
+            }
+        } catch (Exception ex) {
+            log.error("Error occurred in getDeliveryBanks: ", ex);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(null);
+        }
+    }
+
 //
-//    @GetMapping("/status/{transactionId}")
-//    public ResponseEntity<TransactionStatus> getTransactionStatus(@PathVariable String transactionId) {
-//        // Call the service method to get the transaction status
-//        TransactionStatus status = transactionService.getTransactionStatus(transactionId);
-//        return ResponseEntity.ok(status);
-//    }
+    @GetMapping("/status/{reference}")
+    public ResponseEntity<JsonNode> getTransactionStatus(@PathVariable String reference) {
+        log.info(" ====  Entered getTransactionStatus method =====  {}", reference);
+        try {
+            String response = transactionService.getTransactionStatus(reference);
+            JsonNode jsonResponse = utilityService.getXMLResponseAsJson(response);
+            if (jsonResponse != null) {
+                log.info("getTransactionStatus Response: {}", PrettyPrinter.printJson(jsonResponse));
+                return ResponseEntity.ok(jsonResponse);
+            } else {
+                return ResponseEntity.status(500).body(null);
+            }
+        } catch (Exception ex) {
+            log.error("Error occurred in getDeliveryBanks: ", ex);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(null);
+        }
+    }
 
 
 }
