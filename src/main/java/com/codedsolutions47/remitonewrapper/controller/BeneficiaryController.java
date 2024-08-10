@@ -4,7 +4,6 @@ import com.codedsolutions47.remitonewrapper.dtos.request.CreateBeneficiaryReques
 import com.codedsolutions47.remitonewrapper.dtos.request.SearchBeneficiary;
 import com.codedsolutions47.remitonewrapper.dtos.request.UpdateBeneficiary;
 import com.codedsolutions47.remitonewrapper.service.BeneficiaryService;
-import com.codedsolutions47.remitonewrapper.service.PartnerService;
 import com.codedsolutions47.remitonewrapper.service.UtilityService;
 import com.codedsolutions47.remitonewrapper.util.PrettyPrinter;
 import com.fasterxml.jackson.databind.JsonNode;

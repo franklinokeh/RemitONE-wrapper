@@ -6,7 +6,10 @@ import com.codedsolutions47.remitonewrapper.dtos.request.GetDeliveryBanks;
 import com.codedsolutions47.remitonewrapper.service.PartnerService;
 import com.codedsolutions47.remitonewrapper.service.UtilityService;
 import lombok.extern.slf4j.Slf4j;
-import okhttp3.*;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
+import okhttp3.ResponseBody;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 

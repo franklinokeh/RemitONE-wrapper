@@ -3,7 +3,6 @@ package com.codedsolutions47.remitonewrapper.controller;
 
 import com.codedsolutions47.remitonewrapper.dtos.request.ConfirmTransaction;
 import com.codedsolutions47.remitonewrapper.dtos.request.CreateTransaction;
-import com.codedsolutions47.remitonewrapper.service.PartnerService;
 import com.codedsolutions47.remitonewrapper.service.TransactionService;
 import com.codedsolutions47.remitonewrapper.service.UtilityService;
 import com.codedsolutions47.remitonewrapper.util.PrettyPrinter;

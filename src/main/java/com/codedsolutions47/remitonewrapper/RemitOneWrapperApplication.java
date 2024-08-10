@@ -1,6 +1,6 @@
 package com.codedsolutions47.remitonewrapper;
-import okhttp3.*;
 
+import okhttp3.OkHttpClient;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;

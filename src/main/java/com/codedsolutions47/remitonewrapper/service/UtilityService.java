@@ -2,7 +2,6 @@ package com.codedsolutions47.remitonewrapper.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import okhttp3.Request;
-import org.springframework.stereotype.Service;
 
 import java.util.Map;
 
