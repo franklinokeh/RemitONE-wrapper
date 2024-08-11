@@ -8,5 +8,5 @@ import java.util.Map;
 public interface UtilityService {
     JsonNode getXMLResponseAsJson(String response);
 
-    Request createRequest(String path, Map<String, String> params);
+    Request createRequest(String path, Map<String, Object> params);
 }

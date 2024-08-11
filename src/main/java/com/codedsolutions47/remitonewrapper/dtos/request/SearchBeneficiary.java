@@ -4,8 +4,8 @@ import lombok.Data;
 
 @Data
 public class SearchBeneficiary {
-    private int beneficiary_id;
-    private int linked_remitter_id;
+    private int beneficiaryId;
+    private int linkedRemitterId;
     private String name;
     private String fname;
     private String mname;

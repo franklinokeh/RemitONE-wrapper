@@ -1,6 +1,6 @@
 package com.codedsolutions47.remitonewrapper.controller;
 
-import com.codedsolutions47.remitonewrapper.dtos.request.CreateBeneficiaryRequest;
+import com.codedsolutions47.remitonewrapper.dtos.request.CreateBeneficiary;
 import com.codedsolutions47.remitonewrapper.dtos.request.SearchBeneficiary;
 import com.codedsolutions47.remitonewrapper.dtos.request.UpdateBeneficiary;
 import com.codedsolutions47.remitonewrapper.service.BeneficiaryService;
@@ -23,7 +23,7 @@ public class BeneficiaryController {
     private final UtilityService utilityService;
 
     @PostMapping
-    public ResponseEntity<JsonNode> createBeneficiary(@RequestBody CreateBeneficiaryRequest createBeneficiaryRequest) {
+    public ResponseEntity<JsonNode> createBeneficiary(@RequestBody CreateBeneficiary createBeneficiaryRequest) {
         log.info(" ==== Entered CreateBeneficiaryRequest method ======  {}", PrettyPrinter.printJson(createBeneficiaryRequest));
         try {
             String response = beneficiaryService.createBeneficiary(createBeneficiaryRequest);

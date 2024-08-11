@@ -22,14 +22,14 @@ import java.util.Map;
 public class PartnerServiceImpl implements PartnerService {
 
     private final OkHttpClient httpClient;
-    @Value("${BASE_URL}")
-    private String baseUrl;
-    @Value("${ACCESS_USERNAME}")
-    private String accessUsername;
-    @Value("${ACCESS_PASSWORD}")
-    private String accessPassword;
-    @Value("${ACCESS_PIN}")
-    private String accessPin;
+//    @Value("${BASE_URL}")
+//    private String baseUrl;
+//    @Value("${ACCESS_USERNAME}")
+//    private String accessUsername;
+//    @Value("${ACCESS_PASSWORD}")
+//    private String accessPassword;
+//    @Value("${ACCESS_PIN}")
+//    private String accessPin;
     @Value("${api.path.destinationCountries}")
     private String destinationCountriesPath;
     @Value("${api.path.deliveryBanks}")
@@ -49,7 +49,7 @@ public class PartnerServiceImpl implements PartnerService {
 
     @Override
     public String getDestinationCountries() {
-        Map<String, String> params = new HashMap<>();
+        Map<String, Object> params = new HashMap<>();
         Request request = utilityService.createRequest(destinationCountriesPath, params);
         try (Response response = httpClient.newCall(request).execute()) {
             if (!response.isSuccessful()) {
@@ -73,7 +73,7 @@ public class PartnerServiceImpl implements PartnerService {
 
     @Override
     public String getDeliveryBanks(GetDeliveryBanks getDeliveryBanks) {
-        Map<String, String> params = new HashMap<>();
+        Map<String, Object> params = new HashMap<>();
         params.put("dest_country", getDeliveryBanks.getDestCountry());
         params.put("country_code", getDeliveryBanks.getCountryCode());
         params.put("bank_code", getDeliveryBanks.getBankCode());
@@ -99,7 +99,7 @@ public class PartnerServiceImpl implements PartnerService {
 
     @Override
     public String getDeliveryBankBranches(GetDeliveryBankBranches getDeliveryBankBranches) {
-        Map<String, String> params = new HashMap<>();
+        Map<String, Object> params = new HashMap<>();
         params.put("delivery_bank", getDeliveryBankBranches.getDeliveryBank());
         params.put("destination_country", getDeliveryBankBranches.getDestinationCountry());
         params.put("destination_country_code", getDeliveryBankBranches.getDestinationCountryCode());
@@ -125,7 +125,7 @@ public class PartnerServiceImpl implements PartnerService {
 
     @Override
     public String getCollectionPoints(GetCollectionPoints getCollectionPoints) {
-        Map<String, String> params = new HashMap<>();
+        Map<String, Object> params = new HashMap<>();
         params.put("delivery_bank", getCollectionPoints.getDeliveryBank());
         params.put("destination_country", getCollectionPoints.getDestinationCountry());
         params.put("destination_country_code", getCollectionPoints.getDestinationCountryCode());
