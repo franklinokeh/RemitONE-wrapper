@@ -4,5 +4,7 @@ import lombok.Data;
 
 @Data
 public class GetPayoutTransactions {
-    private String transactionId;
+    private String bankName;
+    private String isBankNamePrefix;
+    private String limit;
 }
