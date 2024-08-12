@@ -31,16 +31,16 @@ public class UtilityServiceImpl implements UtilityService {
     private static final ObjectMapper jsonMapper = new ObjectMapper();
     private static final XmlMapper xmlMapper = new XmlMapper();
 
-    public Request createRequest(String path, Map<String, String> additionalParams) {
+    public Request createRequest(String path, Map<String, Object> additionalParams) {
         log.info("Creating request for endpoint: {} with params {}", path, additionalParams);
         FormBody.Builder formBuilder = new FormBody.Builder()
                 .add("username", accessUsername)
                 .add("password", accessPassword)
                 .add("pin", accessPin);
         if (additionalParams != null) {
-            for (Map.Entry<String, String> entry : additionalParams.entrySet()) {
+            for (Map.Entry<String, Object> entry : additionalParams.entrySet()) {
                 if (entry.getValue() != null) {
-                    formBuilder.add(entry.getKey(), entry.getValue());
+                    formBuilder.add(entry.getKey(), (String) entry.getValue());
                 }
             }
         }

@@ -18,6 +18,8 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class RemitterController {
 
+    // TODO  log on Database
+
     private final RemitterService remitterService;
     private final UtilityService utilityService;
 
