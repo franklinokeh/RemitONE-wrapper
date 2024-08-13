@@ -85,6 +85,7 @@ public class Beneficiary {
     private List<Remitter> remitters;
 
     @OneToMany(mappedBy = "beneficiary", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @ToString.Exclude
     private List<Transaction> transactions;
 
 
