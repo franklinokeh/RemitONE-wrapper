@@ -7,7 +7,7 @@ import java.time.LocalDate;
 
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class RemitterRequest {
+public class CreateRemitter {
 
     // Mandatory fields
     private String firstname; // *

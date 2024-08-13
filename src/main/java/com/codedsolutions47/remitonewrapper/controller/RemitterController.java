@@ -1,6 +1,6 @@
 package com.codedsolutions47.remitonewrapper.controller;
 
-import com.codedsolutions47.remitonewrapper.dtos.request.RemitterRequest;
+import com.codedsolutions47.remitonewrapper.dtos.request.CreateRemitter;
 import com.codedsolutions47.remitonewrapper.dtos.request.SearchRemitter;
 import com.codedsolutions47.remitonewrapper.service.RemitterService;
 import com.codedsolutions47.remitonewrapper.service.UtilityService;
@@ -24,7 +24,7 @@ public class RemitterController {
     private final UtilityService utilityService;
 
     @PostMapping
-    public ResponseEntity<JsonNode> createRemitter(@RequestBody RemitterRequest request) {
+    public ResponseEntity<JsonNode> createRemitter(@RequestBody CreateRemitter request) {
         log.info(" ==== Entered getCollectionPoints method ======  {}", PrettyPrinter.printJson(request));
         try {
             String response = remitterService.createRemitter(request);

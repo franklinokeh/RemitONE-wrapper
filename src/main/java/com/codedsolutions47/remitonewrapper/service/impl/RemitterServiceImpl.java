@@ -1,6 +1,6 @@
 package com.codedsolutions47.remitonewrapper.service.impl;
 
-import com.codedsolutions47.remitonewrapper.dtos.request.RemitterRequest;
+import com.codedsolutions47.remitonewrapper.dtos.request.CreateRemitter;
 import com.codedsolutions47.remitonewrapper.dtos.request.SearchRemitter;
 import com.codedsolutions47.remitonewrapper.service.RemitterService;
 import com.codedsolutions47.remitonewrapper.service.UtilityService;
@@ -36,7 +36,7 @@ public class RemitterServiceImpl implements RemitterService {
 
 
     @Override
-    public String createRemitter(RemitterRequest remitterRequest) {
+    public String createRemitter(CreateRemitter remitterRequest) {
         Map<String, Object> params = new HashMap<>();
         params.put("firstname", remitterRequest.getFirstname());
         params.put("lastname", remitterRequest.getLastname());
