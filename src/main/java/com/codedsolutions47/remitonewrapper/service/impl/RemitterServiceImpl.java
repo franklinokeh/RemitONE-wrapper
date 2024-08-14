@@ -122,11 +122,21 @@ public class RemitterServiceImpl implements RemitterService {
                 remitter.setRemitterId(newRemitterId);
                 remitterRepository.save(remitter);
             } else {
-              // TODO save new remitter
+                remitter = new Remitter();
+                remitter.setRemitterId(newRemitterId);
+                remitter.setDob(createRemitter.getDob());
+                remitter.setEmail(createRemitter.getEmail());
+                remitter.setGender(createRemitter.getGender());
+                remitter.setFirstname(createRemitter.getFirstname());
+                remitter.setLastname(createRemitter.getLastname());
+                remitter.setType(createRemitter.getType());
+                remitter.setStatus(createRemitter.getStatus());
+                remitter.setAddress1(createRemitter.getAddress1());
+                remitter.setCity(createRemitter.getCity());
+                remitterRepository.save(remitter);
             }
         } else {
             log.error("Error creating remitter: {}", xmlResponse.getStatus());
-            //throw new SaveRemitterException("Error saving remitter");
         }
     }
 }
