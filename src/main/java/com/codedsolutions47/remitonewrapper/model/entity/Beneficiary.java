@@ -5,7 +5,10 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
+import java.sql.Timestamp;
 import java.util.List;
 
 @Getter
@@ -19,7 +22,7 @@ public class Beneficiary {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
     private Long id;
-
+    private Long beneficiaryId;
     private String name;
     private String fname;
     private String mname;
@@ -87,6 +90,15 @@ public class Beneficiary {
     @OneToMany(mappedBy = "beneficiary", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @ToString.Exclude
     private List<Transaction> transactions;
+
+
+    @Column(name = "createdAt", updatable=false)
+    @CreationTimestamp
+    private Timestamp createdAt;
+
+    @Column(name = "updatedAt")
+    @UpdateTimestamp
+    private Timestamp updatedAt;
 
 
 

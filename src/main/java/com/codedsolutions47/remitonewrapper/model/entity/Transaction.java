@@ -2,6 +2,10 @@ package com.codedsolutions47.remitonewrapper.model.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
+import java.sql.Timestamp;
 
 
 @Getter
@@ -39,6 +43,15 @@ public class Transaction {
     @Lob
     @Column(columnDefinition = "LONGTEXT")
     private String responsePayload;
+
+
+    @Column(name = "created_at", updatable=false)
+    @CreationTimestamp
+    private Timestamp createdAt;
+
+    @Column(name = "updated_at")
+    @UpdateTimestamp
+    private Timestamp updatedAt;
 
 
 

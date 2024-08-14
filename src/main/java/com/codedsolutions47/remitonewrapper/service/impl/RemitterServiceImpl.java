@@ -2,6 +2,11 @@ package com.codedsolutions47.remitonewrapper.service.impl;
 
 import com.codedsolutions47.remitonewrapper.dtos.request.CreateRemitter;
 import com.codedsolutions47.remitonewrapper.dtos.request.SearchRemitter;
+import com.codedsolutions47.remitonewrapper.dtos.response.XmlResponse;
+import com.codedsolutions47.remitonewrapper.exceptions.ApiException;
+import com.codedsolutions47.remitonewrapper.exceptions.GlobalExceptionHandler;
+import com.codedsolutions47.remitonewrapper.model.entity.Remitter;
+import com.codedsolutions47.remitonewrapper.model.repository.RemitterRepository;
 import com.codedsolutions47.remitonewrapper.service.RemitterService;
 import com.codedsolutions47.remitonewrapper.service.UtilityService;
 import lombok.extern.slf4j.Slf4j;
@@ -10,9 +15,14 @@ import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
 import java.io.IOException;
+import java.io.StringReader;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -22,6 +32,7 @@ public class RemitterServiceImpl implements RemitterService {
 
     private final OkHttpClient httpClient;
     private final UtilityService utilityService;
+    private final RemitterRepository remitterRepository;
 
 
     @Value("${api.path.createRemitter}")
@@ -29,9 +40,10 @@ public class RemitterServiceImpl implements RemitterService {
     @Value("${api.path.searchRemitter}")
     private String searchRemitterPath;
 
-    public RemitterServiceImpl(OkHttpClient httpClient, UtilityService utilityService) {
+    public RemitterServiceImpl(OkHttpClient httpClient, UtilityService utilityService, RemitterRepository remitterRepository) {
         this.httpClient = httpClient;
         this.utilityService = utilityService;
+        this.remitterRepository = remitterRepository;
     }
 
 
@@ -56,13 +68,16 @@ public class RemitterServiceImpl implements RemitterService {
                 return null;
             }
             String responseBodyString = responseBody.string();
+            saveRemitter(remitterRequest, responseBodyString);
             log.info("Received XML response from API - {}", responseBodyString);
             return responseBodyString;
-        } catch (IOException e) {
+        } catch (IOException | JAXBException e) {
             log.error("Error calling external API: ", e);
             return null;
         }
     }
+
+
 
     @Override
     public String searchRemitter(SearchRemitter searchRemitter) {
@@ -91,6 +106,27 @@ public class RemitterServiceImpl implements RemitterService {
         } catch (IOException e) {
             log.error("Error calling external API: ", e);
             return null;
+        }
+    }
+
+    @Override
+    public void saveRemitter(CreateRemitter createRemitter, String response) throws JAXBException {
+        JAXBContext jaxbContext = JAXBContext.newInstance(Response.class);
+        Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
+        XmlResponse xmlResponse = (XmlResponse) unmarshaller.unmarshal(new StringReader(response));
+        // Check if the status is "SUCCESS"
+        if ("SUCCESS".equals(xmlResponse.getStatus())) {
+            Long newRemitterId = xmlResponse.getNewRemitterId();
+            Remitter remitter = remitterRepository.findByRemitterId(newRemitterId).orElse(null);
+            if (remitter != null) {
+                remitter.setRemitterId(newRemitterId);
+                remitterRepository.save(remitter);
+            } else {
+              // TODO save new remitter
+            }
+        } else {
+            log.error("Error creating remitter: {}", xmlResponse.getStatus());
+            //throw new SaveRemitterException("Error saving remitter");
         }
     }
 }

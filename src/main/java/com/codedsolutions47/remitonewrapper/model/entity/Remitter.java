@@ -5,7 +5,10 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
+import java.sql.Timestamp;
 import java.time.LocalDate;
 
 @Getter
@@ -38,10 +41,18 @@ public class Remitter {
     private String fathersName;
     private String mothersName;
     private String nationalIdNumber;
-    private int remitterId;
+    private Long remitterId;
 
     @ManyToOne
     @JoinColumn(name = "beneficiary_id", nullable = false)
     private Beneficiary beneficiary;
+
+    @Column(name = "created_at", updatable=false)
+    @CreationTimestamp
+    private Timestamp createdAt;
+
+    @Column(name = "updated_at")
+    @UpdateTimestamp
+    private Timestamp updatedAt;
 
 }

@@ -2,6 +2,15 @@ package com.codedsolutions47.remitonewrapper.service.impl;
 
 import com.codedsolutions47.remitonewrapper.dtos.request.ConfirmTransaction;
 import com.codedsolutions47.remitonewrapper.dtos.request.CreateTransaction;
+import com.codedsolutions47.remitonewrapper.exceptions.ConflictException;
+import com.codedsolutions47.remitonewrapper.exceptions.InvalidBeneficiaryException;
+import com.codedsolutions47.remitonewrapper.exceptions.InvalidRemitterException;
+import com.codedsolutions47.remitonewrapper.model.entity.Beneficiary;
+import com.codedsolutions47.remitonewrapper.model.entity.Remitter;
+import com.codedsolutions47.remitonewrapper.model.entity.Transaction;
+import com.codedsolutions47.remitonewrapper.model.repository.BeneficiaryRepository;
+import com.codedsolutions47.remitonewrapper.model.repository.RemitterRepository;
+import com.codedsolutions47.remitonewrapper.model.repository.TransactionRepository;
 import com.codedsolutions47.remitonewrapper.service.TransactionService;
 import com.codedsolutions47.remitonewrapper.service.UtilityService;
 import lombok.extern.slf4j.Slf4j;
@@ -15,23 +24,32 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 @Service
 @Slf4j
 public class TransactionServiceImpl implements TransactionService {
+    private final RemitterRepository remitterRepository;
+    private final BeneficiaryRepository beneficiaryRepository;
 
     private final OkHttpClient httpClient;
     private final UtilityService utilityService;
+    private final TransactionRepository transactionRepository;
 
     @Value("${api.path.createTransaction}")
     private String createTransactionPath;
     @Value("${api.path.confirmTransaction}")
     private String confirmTransactionPath;
     @Value("${api.path.getTransactionStatus}")
-    private String getTransactionStatus;
-    public TransactionServiceImpl(OkHttpClient httpClient, UtilityService utilityService) {
+    private String getTransactionStatusPath;
+    public TransactionServiceImpl(OkHttpClient httpClient, UtilityService utilityService, TransactionRepository transactionRepository,
+                                  BeneficiaryRepository beneficiaryRepository,
+                                  RemitterRepository remitterRepository) {
         this.httpClient = httpClient;
         this.utilityService = utilityService;
+        this.transactionRepository = transactionRepository;
+        this.beneficiaryRepository = beneficiaryRepository;
+        this.remitterRepository = remitterRepository;
     }
 
 
@@ -96,10 +114,11 @@ public class TransactionServiceImpl implements TransactionService {
         params.put("commission", String.valueOf(createTransaction.getCommission()));
         params.put("commission_hq_from_partner_amount", String.valueOf(createTransaction.getCommissionHqFromPartnerAmount()));
         params.put("commission_hq_from_partner_currency", createTransaction.getCommissionHqFromPartnerCurrency());
+        Transaction saveForFuture =  saveTransactionDetails(createTransaction, params);
         Request request = utilityService.createRequest(createTransactionPath, params);
         try (Response response = httpClient.newCall(request).execute()) {
             if (!response.isSuccessful()) {
-                log.error("Unexpected code {} with message {}", response.code(), response.message());
+                log.error("Unexpected createTransaction code {} with message {}", response.code(), response.message());
                 return null;
             }
             ResponseBody responseBody = response.body();
@@ -108,7 +127,8 @@ public class TransactionServiceImpl implements TransactionService {
                 return null;
             }
             String responseBodyString = responseBody.string();
-            log.info("Received XML response from API - {}", responseBodyString);
+            log.info("Received createTransaction XML response from API - {}", responseBodyString);
+            saveTransactionAfterComplete(saveForFuture, responseBodyString);
             return responseBodyString;
         } catch (IOException e) {
             log.error("Error calling external API: ", e);
@@ -116,11 +136,44 @@ public class TransactionServiceImpl implements TransactionService {
         }
     }
 
+
+
+    public Transaction saveTransactionDetails(CreateTransaction createTransaction, Map<String, Object> params) {
+        Transaction transaction = transactionRepository.findByAgentTransRef(createTransaction.getAgentTransRef());
+        if (Objects.nonNull(transaction)) {
+            log.info("Payment ref already exist and payment is not retry");
+            throw new ConflictException("Payment Reference already exists");
+        }
+        // Retrieve the Beneficiary and Remitter based on their IDs
+        Beneficiary beneficiary = beneficiaryRepository.findByBeneficiaryId(createTransaction.getBeneficiaryId()).orElse(null);
+        Remitter remitter = remitterRepository.findByRemitterId(createTransaction.getRemitterId()).orElse(null);
+
+        if (beneficiary == null) {
+            log.error("Invalid Beneficiary ID: {}", createTransaction.getBeneficiaryId());
+            throw new InvalidBeneficiaryException("Invalid Beneficiary");
+        }
+
+        if (remitter == null) {
+            log.error("Invalid Remitter ID: {}", createTransaction.getRemitterId());
+            throw new InvalidRemitterException("Invalid Remitter");
+        }
+
+        transaction = new Transaction();
+        transaction.setBeneficiary(beneficiary);
+        transaction.setRemitter(remitter);
+        transaction.setAgentTransRef(createTransaction.getAgentTransRef());
+        transaction.setTransType(createTransaction.getTransType());
+        transaction.setBenefTransRef(createTransaction.getBenefTransRef());
+        transaction.setRequestPayload(String.valueOf(params));
+        transactionRepository.save(transaction);
+        return transaction;
+    }
+
+
     @Override
     public String confirmTransaction(ConfirmTransaction confirmTransaction) {
         Map<String, Object> params = new HashMap<>();
         params.put("trans_session_id ", String.valueOf(confirmTransaction.getTransactionId()));
-        //
         Request request = utilityService.createRequest(confirmTransactionPath, params);
         try (Response response = httpClient.newCall(request).execute()) {
             if (!response.isSuccessful()) {
@@ -145,10 +198,10 @@ public class TransactionServiceImpl implements TransactionService {
     public String getTransactionStatus(String reference) {
         Map<String, Object> params = new HashMap<>();
         params.put("trans_ref ", reference);
-        Request request = utilityService.createRequest(confirmTransactionPath, params);
+        Request request = utilityService.createRequest(getTransactionStatusPath, params);
         try (Response response = httpClient.newCall(request).execute()) {
             if (!response.isSuccessful()) {
-                log.error("Unexpected code {} with message {}", response.code(), response.message());
+                log.error("Unexpected getTransactionStatusPath code {} with message {}", response.code(), response.message());
                 return null;
             }
             ResponseBody responseBody = response.body();
@@ -157,11 +210,21 @@ public class TransactionServiceImpl implements TransactionService {
                 return null;
             }
             String responseBodyString = responseBody.string();
-            log.info("Received XML response from API - {}", responseBodyString);
+            log.info("Received getTransactionStatusPath XML response from API - {}", responseBodyString);
             return responseBodyString;
         } catch (IOException e) {
             log.error("Error calling external API: ", e);
             return null;
         }
+    }
+
+    @Override
+    public void saveTransactionAfterComplete(Transaction saveForFuture, String response) {
+        Transaction transaction = transactionRepository.findByAgentTransRef(saveForFuture.getAgentTransRef());
+        if (Objects.isNull(transaction)) {
+            throw new ConflictException("Payment Reference does not exists");
+        }
+        transaction.setResponsePayload(response);
+        transactionRepository.save(transaction);
     }
 }
