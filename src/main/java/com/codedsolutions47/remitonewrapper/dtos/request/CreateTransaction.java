@@ -1,10 +1,12 @@
 package com.codedsolutions47.remitonewrapper.dtos.request;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
 
 import java.time.LocalDate;
 
 @Data
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class CreateTransaction {
     private Long remitterId;
     private Long beneficiaryId;

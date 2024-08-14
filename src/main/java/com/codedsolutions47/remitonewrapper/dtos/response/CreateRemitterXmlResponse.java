@@ -6,7 +6,7 @@ import lombok.Data;
 
 @Data
 @XmlRootElement(name = "response")
-public class XmlResponse {
+public class CreateRemitterXmlResponse {
     @XmlElement(name = "responseId")
     private int responseId;
 

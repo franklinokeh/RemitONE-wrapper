@@ -3,6 +3,9 @@ package com.codedsolutions47.remitonewrapper.service.impl;
 import com.codedsolutions47.remitonewrapper.dtos.request.CreateBeneficiary;
 import com.codedsolutions47.remitonewrapper.dtos.request.SearchBeneficiary;
 import com.codedsolutions47.remitonewrapper.dtos.request.UpdateBeneficiary;
+import com.codedsolutions47.remitonewrapper.dtos.response.CreateBeneficiaryXmlResponse;
+import com.codedsolutions47.remitonewrapper.model.entity.Beneficiary;
+import com.codedsolutions47.remitonewrapper.model.repository.BeneficiaryRepository;
 import com.codedsolutions47.remitonewrapper.service.BeneficiaryService;
 import com.codedsolutions47.remitonewrapper.service.UtilityService;
 import lombok.extern.slf4j.Slf4j;
@@ -13,7 +16,11 @@ import okhttp3.ResponseBody;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
 import java.io.IOException;
+import java.io.StringReader;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -23,6 +30,7 @@ public class BeneficiaryServiceImpl implements BeneficiaryService {
 
     private final OkHttpClient httpClient;
     private final UtilityService utilityService;
+    private final BeneficiaryRepository beneficiaryRepository;
 
 
     @Value("${api.path.createBeneficiary}")
@@ -32,9 +40,10 @@ public class BeneficiaryServiceImpl implements BeneficiaryService {
     @Value("${api.path.updateBeneficiary}")
     private String updateBeneficiaryPath;
 
-    public BeneficiaryServiceImpl(OkHttpClient httpClient, UtilityService utilityService) {
+    public BeneficiaryServiceImpl(OkHttpClient httpClient, UtilityService utilityService, BeneficiaryRepository beneficiaryRepository1) {
         this.httpClient = httpClient;
         this.utilityService = utilityService;
+        this.beneficiaryRepository = beneficiaryRepository1;
     }
 
 
@@ -117,18 +126,19 @@ public class BeneficiaryServiceImpl implements BeneficiaryService {
         Request request = utilityService.createRequest(createBeneficiaryPath, params);
         try (Response response = httpClient.newCall(request).execute()) {
             if (!response.isSuccessful()) {
-                log.error("Unexpected code {} with message {}", response.code(), response.message());
+                log.error("Unexpected createRequest code {} with message {}", response.code(), response.message());
                 return null;
             }
             ResponseBody responseBody = response.body();
             if (responseBody == null) {
-                log.error("Response body is null");
+                log.error("Response createRequest is null");
                 return null;
             }
             String responseBodyString = responseBody.string();
-            log.info("Received XML response from API - {}", responseBodyString);
+            saveBeneficiary(createBeneficiaryRequest, responseBodyString);
+            log.info("Received createRequest XML response from API - {}", responseBodyString);
             return responseBodyString;
-        } catch (IOException e) {
+        } catch (IOException | JAXBException e) {
             log.error("Error calling external API: ", e);
             return null;
         }
@@ -186,6 +196,36 @@ public class BeneficiaryServiceImpl implements BeneficiaryService {
         } catch (IOException e) {
             log.error("Error calling external API: ", e);
             return null;
+        }
+    }
+
+    @Override
+    public void saveBeneficiary(CreateBeneficiary createBeneficiary, String response) throws JAXBException {
+        JAXBContext jaxbContext = JAXBContext.newInstance(Response.class);
+        Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
+        CreateBeneficiaryXmlResponse xmlResponse = (CreateBeneficiaryXmlResponse) unmarshaller.unmarshal(new StringReader(response));
+        if ("SUCCESS".equals(xmlResponse.getStatus())) {
+            Long newBeneficiaryId = xmlResponse.getNewBeneficiaryId();
+            Beneficiary beneficiary = beneficiaryRepository.findByBeneficiaryId(newBeneficiaryId).orElse(null);
+            if(beneficiary != null) {
+                log.error("User with remitterId {}", xmlResponse.getStatus());
+
+            } else {
+                beneficiary = new Beneficiary();
+                beneficiary.setFname(createBeneficiary.getFname());
+                beneficiary.setLname(createBeneficiary.getLname());
+                beneficiary.setMname(createBeneficiary.getMname());
+                beneficiary.setName(createBeneficiary.getName());
+                beneficiary.setAccountNumber(createBeneficiary.getAccountNumber());
+                beneficiary.setAddress1(createBeneficiary.getAddress1());
+                beneficiary.setCity(createBeneficiary.getCity());
+                beneficiary.setState(createBeneficiary.getState());
+                beneficiary.setCountry(createBeneficiary.getCountry());
+                beneficiary.setAddress2(createBeneficiary.getAddress2());
+                beneficiary.setCardNumber(createBeneficiary.getCardNumber());
+                beneficiary.setBeneficiaryId(newBeneficiaryId);
+                beneficiaryRepository.save(beneficiary);
+            }
         }
     }
 }

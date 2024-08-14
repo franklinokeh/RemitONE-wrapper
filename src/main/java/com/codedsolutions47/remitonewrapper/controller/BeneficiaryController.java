@@ -19,7 +19,6 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class BeneficiaryController {
 
-    // TODO  log on Database
 
     private final BeneficiaryService beneficiaryService;
     private final UtilityService utilityService;

@@ -2,9 +2,7 @@ package com.codedsolutions47.remitonewrapper.service.impl;
 
 import com.codedsolutions47.remitonewrapper.dtos.request.CreateRemitter;
 import com.codedsolutions47.remitonewrapper.dtos.request.SearchRemitter;
-import com.codedsolutions47.remitonewrapper.dtos.response.XmlResponse;
-import com.codedsolutions47.remitonewrapper.exceptions.ApiException;
-import com.codedsolutions47.remitonewrapper.exceptions.GlobalExceptionHandler;
+import com.codedsolutions47.remitonewrapper.dtos.response.CreateRemitterXmlResponse;
 import com.codedsolutions47.remitonewrapper.model.entity.Remitter;
 import com.codedsolutions47.remitonewrapper.model.repository.RemitterRepository;
 import com.codedsolutions47.remitonewrapper.service.RemitterService;
@@ -15,7 +13,6 @@ import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import javax.xml.bind.JAXBContext;
@@ -113,14 +110,15 @@ public class RemitterServiceImpl implements RemitterService {
     public void saveRemitter(CreateRemitter createRemitter, String response) throws JAXBException {
         JAXBContext jaxbContext = JAXBContext.newInstance(Response.class);
         Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
-        XmlResponse xmlResponse = (XmlResponse) unmarshaller.unmarshal(new StringReader(response));
+        CreateRemitterXmlResponse xmlResponse = (CreateRemitterXmlResponse) unmarshaller.unmarshal(new StringReader(response));
         // Check if the status is "SUCCESS"
         if ("SUCCESS".equals(xmlResponse.getStatus())) {
             Long newRemitterId = xmlResponse.getNewRemitterId();
             Remitter remitter = remitterRepository.findByRemitterId(newRemitterId).orElse(null);
             if (remitter != null) {
-                remitter.setRemitterId(newRemitterId);
-                remitterRepository.save(remitter);
+                log.error("User with remitterId {}", xmlResponse.getStatus());
+//                remitter.setRemitterId(newRemitterId);
+//                remitterRepository.save(remitter);
             } else {
                 remitter = new Remitter();
                 remitter.setRemitterId(newRemitterId);
