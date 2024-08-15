@@ -12,6 +12,7 @@ import com.codedsolutions47.remitonewrapper.model.repository.BeneficiaryReposito
 import com.codedsolutions47.remitonewrapper.model.repository.RemitterRepository;
 import com.codedsolutions47.remitonewrapper.model.repository.TransactionRepository;
 import com.codedsolutions47.remitonewrapper.service.TransactionService;
+import com.codedsolutions47.remitonewrapper.service.UserService;
 import com.codedsolutions47.remitonewrapper.service.UtilityService;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.OkHttpClient;
@@ -34,6 +35,7 @@ public class TransactionServiceImpl implements TransactionService {
 
     private final OkHttpClient httpClient;
     private final UtilityService utilityService;
+    private final UserService userService;
     private final TransactionRepository transactionRepository;
 
     @Value("${api.path.createTransaction}")
@@ -44,17 +46,19 @@ public class TransactionServiceImpl implements TransactionService {
     private String getTransactionStatusPath;
     public TransactionServiceImpl(OkHttpClient httpClient, UtilityService utilityService, TransactionRepository transactionRepository,
                                   BeneficiaryRepository beneficiaryRepository,
-                                  RemitterRepository remitterRepository) {
+                                  RemitterRepository remitterRepository, UserService userService) {
         this.httpClient = httpClient;
         this.utilityService = utilityService;
         this.transactionRepository = transactionRepository;
         this.beneficiaryRepository = beneficiaryRepository;
         this.remitterRepository = remitterRepository;
+        this.userService = userService;
     }
 
 
     @Override
     public String createTransaction(CreateTransaction createTransaction) {
+        String partnerId = userService.getPartnerIdFromAuthentication();
         Map<String, Object> params = new HashMap<>();
         //
         params.put("remitter_id", String.valueOf(createTransaction.getRemitterId()));
@@ -114,7 +118,7 @@ public class TransactionServiceImpl implements TransactionService {
         params.put("commission", String.valueOf(createTransaction.getCommission()));
         params.put("commission_hq_from_partner_amount", String.valueOf(createTransaction.getCommissionHqFromPartnerAmount()));
         params.put("commission_hq_from_partner_currency", createTransaction.getCommissionHqFromPartnerCurrency());
-        Transaction saveForFuture =  saveTransactionDetails(createTransaction, params);
+        Transaction saveForFuture =  saveTransactionDetails(createTransaction, partnerId, params);
         Request request = utilityService.createRequest(createTransactionPath, params);
         try (Response response = httpClient.newCall(request).execute()) {
             if (!response.isSuccessful()) {
@@ -138,7 +142,7 @@ public class TransactionServiceImpl implements TransactionService {
 
 
 
-    public Transaction saveTransactionDetails(CreateTransaction createTransaction, Map<String, Object> params) {
+    public Transaction saveTransactionDetails(CreateTransaction createTransaction, String partnerId, Map<String, Object> params) {
         Transaction transaction = transactionRepository.findByAgentTransRef(createTransaction.getAgentTransRef());
         if (Objects.nonNull(transaction)) {
             log.info("Payment ref already exist and payment is not retry");
@@ -164,6 +168,7 @@ public class TransactionServiceImpl implements TransactionService {
         transaction.setAgentTransRef(createTransaction.getAgentTransRef());
         transaction.setTransType(createTransaction.getTransType());
         transaction.setBenefTransRef(createTransaction.getBenefTransRef());
+        transaction.setPartnerId(partnerId);
         transaction.setRequestPayload(String.valueOf(params));
         transactionRepository.save(transaction);
         return transaction;

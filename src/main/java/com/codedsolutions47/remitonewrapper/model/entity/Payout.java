@@ -2,8 +2,6 @@ package com.codedsolutions47.remitonewrapper.model.entity;
 
 import com.codedsolutions47.remitonewrapper.model.enums.PayoutStatus;
 import jakarta.persistence.*;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -66,6 +64,8 @@ public class Payout {
 
     @Column(name = "processed_by")
     private String processedBy;
+
+    private String partnerId;
 
     @Column(name = "trans_type", nullable = false)
     private String transType;

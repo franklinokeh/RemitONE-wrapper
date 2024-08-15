@@ -81,6 +81,7 @@ public class Beneficiary {
     private String suspicious;
     private String suspicionReason;
     private int linkedMemberId;
+    private String partnerId;
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = "beneficiary_id")

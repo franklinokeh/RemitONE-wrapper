@@ -2,7 +2,6 @@ package com.codedsolutions47.remitonewrapper.controller;
 
 import com.codedsolutions47.remitonewrapper.model.entity.User;
 import com.codedsolutions47.remitonewrapper.service.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

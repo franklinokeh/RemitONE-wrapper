@@ -42,6 +42,8 @@ public class Remitter {
     private String mothersName;
     private String nationalIdNumber;
     private Long remitterId;
+    private String partnerId;
+
 
     @ManyToOne
     @JoinColumn(name = "beneficiary_id", nullable = false)

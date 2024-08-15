@@ -1,7 +1,10 @@
 package com.codedsolutions47.remitonewrapper.model.entity;
 
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -38,6 +41,7 @@ public class Transaction {
     private String agentTransRef;
     private String benefTransRef;
     private String transType;
+    private String partnerId;
 
 
     @Lob

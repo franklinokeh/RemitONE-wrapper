@@ -13,6 +13,6 @@ public interface BeneficiaryService {
 
     String updateBeneficiary(UpdateBeneficiary updateBeneficiary);
 
-    void saveBeneficiary(CreateBeneficiary createBeneficiary, String response) throws JAXBException;
+    void saveBeneficiary(CreateBeneficiary createBeneficiary, String partnerId, String response) throws JAXBException;
 
 }

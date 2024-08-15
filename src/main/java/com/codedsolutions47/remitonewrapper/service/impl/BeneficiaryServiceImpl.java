@@ -7,6 +7,7 @@ import com.codedsolutions47.remitonewrapper.dtos.response.CreateBeneficiaryXmlRe
 import com.codedsolutions47.remitonewrapper.model.entity.Beneficiary;
 import com.codedsolutions47.remitonewrapper.model.repository.BeneficiaryRepository;
 import com.codedsolutions47.remitonewrapper.service.BeneficiaryService;
+import com.codedsolutions47.remitonewrapper.service.UserService;
 import com.codedsolutions47.remitonewrapper.service.UtilityService;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.OkHttpClient;
@@ -30,6 +31,7 @@ public class BeneficiaryServiceImpl implements BeneficiaryService {
 
     private final OkHttpClient httpClient;
     private final UtilityService utilityService;
+    private final UserService userService;
     private final BeneficiaryRepository beneficiaryRepository;
 
 
@@ -40,15 +42,17 @@ public class BeneficiaryServiceImpl implements BeneficiaryService {
     @Value("${api.path.updateBeneficiary}")
     private String updateBeneficiaryPath;
 
-    public BeneficiaryServiceImpl(OkHttpClient httpClient, UtilityService utilityService, BeneficiaryRepository beneficiaryRepository1) {
+    public BeneficiaryServiceImpl(OkHttpClient httpClient, UtilityService utilityService, UserService userService, BeneficiaryRepository beneficiaryRepository1) {
         this.httpClient = httpClient;
         this.utilityService = utilityService;
+        this.userService = userService;
         this.beneficiaryRepository = beneficiaryRepository1;
     }
 
 
     @Override
     public String createBeneficiary(CreateBeneficiary createBeneficiaryRequest) {
+        String partnerId = userService.getPartnerIdFromAuthentication();
         Map<String, Object> params = new HashMap<>();
 
         // Basic Information
@@ -135,7 +139,7 @@ public class BeneficiaryServiceImpl implements BeneficiaryService {
                 return null;
             }
             String responseBodyString = responseBody.string();
-            saveBeneficiary(createBeneficiaryRequest, responseBodyString);
+            saveBeneficiary(createBeneficiaryRequest, partnerId, responseBodyString);
             log.info("Received createRequest XML response from API - {}", responseBodyString);
             return responseBodyString;
         } catch (IOException | JAXBException e) {
@@ -200,7 +204,7 @@ public class BeneficiaryServiceImpl implements BeneficiaryService {
     }
 
     @Override
-    public void saveBeneficiary(CreateBeneficiary createBeneficiary, String response) throws JAXBException {
+    public void saveBeneficiary(CreateBeneficiary createBeneficiary, String partnerId, String response) throws JAXBException {
         JAXBContext jaxbContext = JAXBContext.newInstance(Response.class);
         Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
         CreateBeneficiaryXmlResponse xmlResponse = (CreateBeneficiaryXmlResponse) unmarshaller.unmarshal(new StringReader(response));
@@ -224,6 +228,7 @@ public class BeneficiaryServiceImpl implements BeneficiaryService {
                 beneficiary.setAddress2(createBeneficiary.getAddress2());
                 beneficiary.setCardNumber(createBeneficiary.getCardNumber());
                 beneficiary.setBeneficiaryId(newBeneficiaryId);
+                beneficiary.setPartnerId(partnerId);
                 beneficiaryRepository.save(beneficiary);
             }
         }
