@@ -1,20 +1,23 @@
 package com.codedsolutions47.remitonewrapper.config;
 
+import com.codedsolutions47.remitonewrapper.service.UserService;
+import com.codedsolutions47.remitonewrapper.service.impl.UserServiceImpl;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
+@EnableWebSecurity
 public class SecurityConfiguration {
 
     @Value("${auth.user}")
@@ -23,32 +26,28 @@ public class SecurityConfiguration {
     @Value("${auth.password}")
     private String password;
 
-    @Bean
-    public PasswordEncoder passwordEncoder()
-    {return new BCryptPasswordEncoder();}
+    @Autowired
+    private UserServiceImpl userService;
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity security) throws Exception {
-        return security.csrf(AbstractHttpConfigurer::disable)
-                .authorizeHttpRequests(authorize->authorize.anyRequest().authenticated())
-                .httpBasic(Customizer.withDefaults())
-                .build();
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        http
+                .csrf(AbstractHttpConfigurer::disable) // Disable CSRF protection
+                .authorizeHttpRequests(authorize -> authorize
+                        .anyRequest().authenticated()) // Require authentication for all requests
+                        .httpBasic();
+        return http.build();
     }
 
 
+
     @Bean
-    public UserDetailsService userDetailsService()
-    {
-        UserDetails user = User.builder()
-                .username("user")
-                .password(passwordEncoder().encode("user@123"))
-                .roles("USER")
-                .build();
-        UserDetails admin = User.builder()
-                .username(username)
-                .password(passwordEncoder().encode(password))
-                .roles("ADMIN")
-                .build();
-        return new InMemoryUserDetailsManager(user,admin);
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+
+    @Autowired
+    public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
+        auth.userDetailsService(userService).passwordEncoder(passwordEncoder());
     }
 }
