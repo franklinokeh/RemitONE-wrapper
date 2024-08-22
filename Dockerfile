@@ -1,11 +1,13 @@
-FROM openjdk:17-jdk-slim
-
+FROM maven:3.8.3-openjdk-17 AS build
 LABEL authors="franklinokeh"
 
 WORKDIR /app
 
-COPY target/RemitOne.jar app.jar
+COPY . ./
+RUN mvn clean package -DskipTests
 
-EXPOSE 8080
+FROM maven:3.8.3-openjdk-8
+COPY --from=build /app/target/RemitOne.jar RemitOne.jar
 
-ENTRYPOINT ["java", "-jar", "app.jar"]
+ENTRYPOINT ["java","-jar","/RemitOne.jar"]
+EXPOSE 80
