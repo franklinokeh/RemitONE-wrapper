@@ -1,4 +1,4 @@
-FROM  openjdk:17-jdk-slim AS build
+FROM maven:3.8.3-openjdk-17 AS build
 LABEL authors="franklinokeh"
 
 WORKDIR /app
