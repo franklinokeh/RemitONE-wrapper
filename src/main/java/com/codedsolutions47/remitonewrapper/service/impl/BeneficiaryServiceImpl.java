@@ -52,7 +52,8 @@ public class BeneficiaryServiceImpl implements BeneficiaryService {
 
     @Override
     public String createBeneficiary(CreateBeneficiary createBeneficiaryRequest) {
-        String partnerId = userService.getPartnerIdFromAuthentication();
+//        String partnerId = userService.getPartnerIdFromAuthentication();
+        String partnerId = "";
         Map<String, Object> params = new HashMap<>();
 
         // Basic Information

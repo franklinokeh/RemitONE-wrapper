@@ -58,7 +58,8 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     public String createTransaction(CreateTransaction createTransaction) {
-        String partnerId = userService.getPartnerIdFromAuthentication();
+//        String partnerId = userService.getPartnerIdFromAuthentication();
+        String partnerId = "";
         Map<String, Object> params = new HashMap<>();
         //
         params.put("remitter_id", String.valueOf(createTransaction.getRemitterId()));

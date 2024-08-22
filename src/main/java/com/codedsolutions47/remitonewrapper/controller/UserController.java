@@ -16,15 +16,15 @@ public class UserController {
         this.userService = userService;
     }
 
-    @PostMapping
-    public ResponseEntity<User> createUser(@RequestBody User user) {
-        userService.createUser(user);
-        return new ResponseEntity<>(user, HttpStatus.CREATED);
-    }
-
-    @PutMapping("/reset-password")
-    public ResponseEntity<Void> resetPassword(@RequestParam String username, @RequestParam String newPassword) {
-        userService.resetPassword(username, newPassword);
-        return new ResponseEntity<>(HttpStatus.OK);
-    }
+//    @PostMapping
+//    public ResponseEntity<User> createUser(@RequestBody User user) {
+//        userService.createUser(user);
+//        return new ResponseEntity<>(user, HttpStatus.CREATED);
+//    }
+//
+//    @PutMapping("/reset-password")
+//    public ResponseEntity<Void> resetPassword(@RequestParam String username, @RequestParam String newPassword) {
+//        userService.resetPassword(username, newPassword);
+//        return new ResponseEntity<>(HttpStatus.OK);
+//    }
 }
