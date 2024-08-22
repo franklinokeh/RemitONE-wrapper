@@ -9,10 +9,10 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.codedsolutions47</groupId>
-    <artifactId>RemitONE-wrapper</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
-    <name>RemitONE-wrapper</name>
-    <description>RemitONE-wrapper</description>
+    <artifactId>RemitONE</artifactId>
+    <version>0.0.1</version>
+    <name>RemitONE</name>
+    <description>RemitONE</description>
     <url/>
     <licenses>
         <license/>
@@ -114,6 +114,7 @@
     </dependencies>
 
     <build>
+        <finalName>RemitOne</finalName>
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
